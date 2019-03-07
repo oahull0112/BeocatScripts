@@ -1,20 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar  7 16:05:57 2019
-
-@author: olivi
+@author: Olivia Hull
 """
-
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Mar  6 14:18:46 2019
-
-@author: olivi
-"""
-
-tA = ["Ag", "H"]
-nA = [6, 2]
-
 
 def runOctParse(filename, tA, nA):
     '''
