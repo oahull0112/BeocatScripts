@@ -5,10 +5,6 @@ Created on Thu Mar  7 16:05:57 2019
 @author: olivi
 """
 
-tA = ["Ag", "H"]
-nA = [6, 2]
-
-
 def runOctParse(filename, tA, nA):
     '''
     Takes an Octopus coordinate file and outputs in .xyz Format
