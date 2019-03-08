@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-@author: Olivia Hull
+Created on Thu Mar  7 16:05:57 2019
+
+@author: olivi
 """
+
+tA = ["Ag", "H"]
+nA = [6, 2]
+
 
 def runOctParse(filename, tA, nA):
     '''
@@ -31,7 +37,7 @@ def runOctParse(filename, tA, nA):
     Outputs:
         The program writes a file formatted as "inputfilename_xyzFormat.xyz"
         where inputfilename is the name you assigned to the variable filename
-            
+        when calling runOctParse.
     '''
     nAtoms = sum(nA)
     outName = filename + '_xyzFormat.xyz'
@@ -41,6 +47,7 @@ def runOctParse(filename, tA, nA):
     
 
 def getAtomNumberList(tA, nA):
+    # making the list of atoms as they appear in your octopus input file
     anList = []
     c = 0
     for i in nA:
@@ -51,6 +58,7 @@ def getAtomNumberList(tA, nA):
 
 
 def getCoordinates(filename, nAtoms):
+    # reading the coordinates file into the cList variable
     with open(filename) as f:
         cList = f.readlines()
     
@@ -58,15 +66,18 @@ def getCoordinates(filename, nAtoms):
     
     coords = []
     
+    # removing all info but the coordinates info
+    # i.e. no velocity or forces info remains
     for i in range(len(cList)):
         coords.append(cList[i].split()[2:(nAtoms*3)+2]) # the [2::] is ignoring the first two entries, the iteration number and the time
 
     return coords 
-#nAtoms = int((len(coords[0]))/3)
 
 def makeOutputFile(coords, nAtoms, outName, anList):
+    
     tList = []
     
+    # Formatting into a .xyz (without atom labels yet)
     for j in range(len(coords)):
         tList.append(str(nAtoms))
         tList.append(' ')
@@ -76,6 +87,8 @@ def makeOutputFile(coords, nAtoms, outName, anList):
     
     outF = open(outName, "w")
     
+    # Using modular arithematic to figure out how to align the atom label and the coordinates.
+    # Then writing the line to the output file
     for l in range(len(tList)):
         if l%(nAtoms+2) == 0:
             outF.write(tList[l])
