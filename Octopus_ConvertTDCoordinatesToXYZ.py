@@ -2,7 +2,7 @@
 """
 Created on Thu Mar  7 16:05:57 2019
 
-@author: olivi
+@author: Olivia Hull
 """
 
 def runOctParse(filename, tA, nA):
