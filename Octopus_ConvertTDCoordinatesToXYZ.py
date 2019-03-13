@@ -94,10 +94,14 @@ def makeOutputFile(coords, nAtoms, outName, anList):
         else:
             j = l%(nAtoms + 2)
             q = j - 2
-            aux_line = str(anList[q] + " " + str(tList[l][0]) + " " + str(tList[l][1]) + " " + str(tList[l][2]))
+            try:
+                aux_line = str(anList[q] + " " + str(tList[l][0]) + " " + str(tList[l][1]) + " " + str(tList[l][2]))
+            except:
+                print("An error has occured and the script has been terminated. The file outputted from this script may contain errors. The most common cause of this is that the calculation did not terminate normally and/or the calculation did not completed. Check that all time steps are printed to the coordinates file. Check that the input arrays to this script are correct.")
+                print("\n")
+                return None
             outF.write(aux_line)
             outF.write("\n")
     
     outF.close()
-
 
