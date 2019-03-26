@@ -89,3 +89,22 @@ def getSmallMoleculeDistance(coord_lines):
     
     nA = i # number of atoms
    
+    x1 = []
+    x2 = []
+    
+    y1 = []
+    y2 = []
+    
+    z1 = []
+    z2 = []
+    
+    '''
+    the index will be the number of atoms plus the pos1, pos2 to get the next time step of that coordinate.
+    So the incrementer will be the number of atoms
+    And the starting points will be pos1, pos2 (+ 1 to offset the first time entry)
+    
+    One we have x_i, y_i, z_i at each time step, then we can use euclidean distance formula to get distance.
+    We can also run a separate indexer called t that increases by 1  during each loop to get the number of time steps
+    then do a "range(t)" command to be able to plot the result against time.
+    '''
+    
