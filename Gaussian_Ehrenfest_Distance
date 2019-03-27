@@ -3,22 +3,20 @@
 Created on Mon Mar 25 17:09:37 2019
 
 @author: olivia
-
-Measure distance as a function of time for two atoms in an ehrenfest dynamics simulation
 """
 
 
 from __future__ import division
-import csv
 import numpy as np
-from scipy.fftpack import fft, fftfreq
 #matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
-#import matplotlib.axes as ax
 import sys
-from mpl_toolkits import mplot3d
+import inspect
+import importlib
+import os
 
 filename='test'
+fig_out = filename[1:-2]+"_distFig.png"
 
 
 def get_nuc_coords(filename):
@@ -43,68 +41,104 @@ def get_nuc_coords(filename):
                     else:
                         coord_lines.append([coord.split()[1], coord.split()[3], coord.split()[4], coord.split()[5]])
                         coord = next(f)
-                        
+    f.close()
+    
+    return coord_lines                    
     
     '''Now all of the coordinate data is in coord_lines'''
+
     
+def getDistance(coord_lines, pos1, pos2):
+    #pos1 = 9 # 9th position in coord list
+    #pos2 = 10 # 10th position in coord list
     
-def view_coords(coord_lines):
+    # find number of atoms
+    nA = 0
+    while type(coord_lines[nA+1]) == list:
+        nA = nA+1
     
-    '''PUT LINES TO LOAD IN DATA HERE
-    coord_lines = 
+    # preallocate
+    x1 = [] ; x2 = [] ; xd = []
+    y1 = [] ; y2 = [] ; yd = []
+    z1 = [] ; z2 = [] ; zd = []
+    
+    d = []
+    t = []
+    
+    #maxiter = int(np.floor(len(coord_lines)/i))
+    
+    # get coordinates, compute distance at each time step
+    ti = 0 # "time index"
+    j = 0
+    i = nA + 1 # indexer
+    while j <= len(coord_lines)-i:
+        x1.append(float(coord_lines[pos1 + j][1]))
+        y1.append(float(coord_lines[pos1 + j][2]))
+        z1.append(float(coord_lines[pos1 + j][3]))
+        
+        x2.append(float(coord_lines[pos2 + j][1]))
+        y2.append(float(coord_lines[pos2 + j][2]))
+        z2.append(float(coord_lines[pos2 + j][3]))
+        
+        xd.append((x1[ti] - x2[ti])**2)
+        yd.append((y1[ti] - y2[ti])**2)
+        zd.append((z1[ti] - z2[ti])**2)
+        
+        d.append(np.sqrt(xd[ti] + yd[ti] + zd[ti]))
+        t.append(ti)
+        
+        j =  j + i
+        ti = ti + 1  
+    
+    td = np.zeros((len(t), 2))
+    td[:, 0] = np.array(t)
+    td[:, 1] = np.array(d)
+
+    return td
+
+def plotDistance(td, a1, a2, figOut):
     '''
-    ax = plt.axes(projection='3d')
-    
-    
-    x_coords = []
-    y_coords = []
-    z_coords = []
-    i = 0
-    while i < len(coord_lines):
-        if type(coord_lines[i]) == int:
-            i = i+1
-            '''PLOT STUFF'''
-            #ax.scatter3D(xdata, ydata,zdata, c=zdata, cmap='Greens')
-            #plt.cla()
-            ax.set_xlim3d(-10, 10)
-            ax.set_ylim3d(-10,10)
-            ax.set_zlim3d(-10,10)
-            ax.scatter3D(x_coords, y_coords, z_coords, depthshade=False)
-            plt.title('step = ' + str(i))
-            plt.pause(.001)
-            x_coords = []; y_coords = []; z_coords = []
-        else:
-            x_coords.append(float(coord_lines[i][1]))
-            y_coords.append(float(coord_lines[i][2]))
-            z_coords.append(float(coord_lines[i][3]))
-        i = i + 1
-    
-def getSmallMoleculeDistance(coord_lines):
-    pos1 = 9 # 9th position in coord list
-    pos2 = 10 # 10th position in coord list
-    
-    i = 0
-    while type(coord_lines[i+1]) == list:
-        i = i+1
-    
-    nA = i # number of atoms
-   
-    x1 = []
-    x2 = []
-    
-    y1 = []
-    y2 = []
-    
-    z1 = []
-    z2 = []
-    
     '''
-    the index will be the number of atoms plus the pos1, pos2 to get the next time step of that coordinate.
-    So the incrementer will be the number of atoms
-    And the starting points will be pos1, pos2 (+ 1 to offset the first time entry)
+    a1 = 'N'
+    a2 = 'N'
     
-    One we have x_i, y_i, z_i at each time step, then we can use euclidean distance formula to get distance.
-    We can also run a separate indexer called t that increases by 1  during each loop to get the number of time steps
-    then do a "range(t)" command to be able to plot the result against time.
-    '''
+    plt.figure()
+    
+    plt.plot(td[:,0], td[:,1])
+    plt.xlabel("time step")
+    plt.ylabel("distance (Angstrom)")
+    plt.title(a1+"-"+a2+" bond distance over time")
+    
+    plt.savefig(figOut, format='png', dpi=300, bbox_inches='tight')
+    
+
+#!/usr/bin/env python
+#make executable in bash chmod +x PyRun
+# this is from https://stackoverflow.com/questions/3987041/run-function-from-the-command-line
+
+if __name__ == "__main__":
+    cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
+    if cmd_folder not in sys.path:
+        sys.path.insert(0, cmd_folder)
+
+    # get the second argument from the command line      
+    methodname = sys.argv[1]
+
+    # split this into module, class and function name
+    modulename, classname, funcname = methodname.split(".")
+
+    # get pointers to the objects based on the string names
+    themodule = importlib.import_module(modulename)
+    theclass = getattr(themodule, classname)
+    thefunc = getattr(theclass, funcname)
+
+    # pass all the parameters from the third until the end of 
+    # what the function needs & ignore the rest
+    args = inspect.getargspec(thefunc)
+    z = len(args[0]) + 2
+    params=sys.argv[2:z]
+    thefunc(*params)
+    
+    
+    
     
