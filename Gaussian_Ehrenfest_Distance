@@ -23,6 +23,7 @@ Things to do:
     3. Have the input parameters in the figure
     4. Write something that plots the Electric field over time
     5. Write something that plots the energy over time (to check conservation)
+    6. Add Ag-N distance function (just track one N atom rather than COM or anything like that)
 '''
 
 
