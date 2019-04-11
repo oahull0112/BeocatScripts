@@ -8,15 +8,24 @@ Created on Mon Mar 25 17:09:37 2019
 
 from __future__ import division
 import numpy as np
-#matplotlib.use('TkAgg')
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import sys
 import inspect
 import importlib
 import os
 
-filename='test'
-fig_out = filename[1:-2]+"_distFig.png"
+'''
+Things to do:
+    1. make the time step in terms of fs
+    2. Write something that gets the input parameters (e field type, strength, etc.)
+    3. Have the input parameters in the figure
+    4. Write something that plots the Electric field over time
+    5. Write something that plots the energy over time (to check conservation)
+'''
+
+
 
 
 def get_nuc_coords(filename):
@@ -114,7 +123,7 @@ def plotDistance(td, a1, a2, figOut):
 
 #!/usr/bin/env python
 #make executable in bash chmod +x PyRun
-# this is from https://stackoverflow.com/questions/3987041/run-function-from-the-command-line
+# https://stackoverflow.com/questions/3987041/run-function-from-the-command-line
 
 if __name__ == "__main__":
     cmd_folder = os.path.realpath(os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0]))
@@ -140,5 +149,5 @@ if __name__ == "__main__":
     thefunc(*params)
     
     
-    
+
     
