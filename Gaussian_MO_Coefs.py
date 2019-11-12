@@ -1,22 +1,39 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Aug  9 16:24:43 2018
-
+Created on Thu Aug  9 16:24:43 2019
 @author: Olivia Hull
 
-Calculate the percent composition of a molecular orbital
-in Gaussian, specify pop=full keyword
-
+Calculate the percent composition of a molecular orbital of its atomic orbitals.
 This package is written restrictively for Ag6-N2. Any deviation from my standard Ag6-N2 coordinate input
 will need to be accounted for in the package. See relevant function comments
+
+NOTE: In order to run this, your Gaussian calculation must be run with the pop=full keyword
+      in order for it to actually print out all of the MO coefficient information
+      
+WARNING: this code is kind of garbage. Need to manually change in TWO functions if not using N9, N10 (for Ag8N2)
+         originally this had to be changed from N7, N8 for Ag6N2 and I haven't changed it yet to make everything
+         more general for any system. To fix the code, need to track down the bugs in the get_raw_coefs routine.
+         It would also be possible to make a wrapper function that just runs one "chunk" at a time automatically
+         and then concatenates the results.
+WARNING: See the warning in find_percent_composition!!! Run one "chunk" of MOs at a time or it will fail.
 """
 
 import numpy as np
 
-def control_center(filename, MO_array):
+def find_percent_composition(filename, MO_array):
     '''run this function to get the total result. Outputs the entire MO coefficient array 'data'
-    and the partitions into N7 and N8.'''
+    and the partitions into N7 and N8.
+    input:
+        -filename: name of the Gaussian output file as a string
+        -MO_array: array of the MO indices that you want the compositions of, e.g. MO_array = [1, 2, 3] would give
+                   the composition of the first three orbitals.
+    
+    Note: this code is buggy. It will fail if you specify MO coefs in the MO_array if those MO coefs
+    are not in the same "chunk" of the Gaussian output file
+    To get around this, just make multiple calls...Run lines = determine_indexing_lines(MO_array)
+    and if lines gives multiple inner arrays, run individual calculations for each inner array
+    '''
     
     MO_array = sorted(MO_array)
     line_count = get_line_count(filename)
@@ -26,9 +43,9 @@ def control_center(filename, MO_array):
     data_array = cleanup_raw_coefs(raw_MO_data, line_count, MO_array, clean_array, lines)
     N7, N8 = N2_CSPA_contributions(data_array, MO_array, line_count)
     
-    return data_array, N7, N8
+    #return data_array, N7, N8
+    return N7, N8
 
-    
 def get_line_count(filename):
     ''' determines number of AOs (= number of MOs)'''
     
@@ -110,8 +127,12 @@ def make_initial_array(raw_MO_data, line_count):
     return clean_array
 
 def determine_indexing_lines(MO_array):
-    '''Breaks up the inputted MO_array into groups based on modulus 5, i.e. the MO_array = [1,2, 3, 4, 5,6,7,8,9,10,11,12]
-    would output lines = [[1,2,3,4,5],[6,7,8,9,10],[11,12]]'''
+    '''
+    Breaks up the inputted MO_array into groups based on modulus 5, i.e. the MO_array = [1,2, 3, 4, 5,6,7,8,9,10,11,12]
+    would output lines = [[1,2,3,4,5],[6,7,8,9,10],[11,12]]
+    The reason it does this is because that's how the Gaussian output file is set up
+    that is, the MOs are listed as 5 columns, then it jumps down to the next five
+    '''
     
     MO = 0
     next_MO = 1
@@ -185,10 +206,10 @@ def N2_CSPA_contributions(data_array, MO_array, line_count):
             k = k + 1
         
     for i in range(len(data_array)):
-        if str(7) in data_array[i][1]: # must change these if the N order moves!!!
-            N7 = sq_sum_N(i,data_array,N7, line_count, 7)
-        if str(8) in data_array[i][1]:
-            N8 = sq_sum_N(i,data_array,N8, line_count, 8)
+        if str(9) in data_array[i][1]: # must change these if the N order moves!!!
+            N7 = sq_sum_N(i,data_array,N7, line_count, 9)
+        if str(10) in data_array[i][1]:
+            N8 = sq_sum_N(i,data_array,N8, line_count, 10)
         
     for i in range(len(tots_sq)):
         N7_sq_rat[i] = 100.0*N7_sq_rat[i]*N7[i]/tots_sq[i]
@@ -249,10 +270,10 @@ def N2_contributions(data_array, MO_array, line_count):
             horiz_sq = horiz_sq + float(j) ** 2
         
     for i in range(len(data_array)):
-        if str(7) in data_array[i][1]: # must change these if the N order moves!!!
-            N7 = sum_N(i,data_array,N7, line_count, 7)
-        if str(8) in data_array[i][1]:
-            N8 = sum_N(i,data_array,N8, line_count, 8)
+        if str(9) in data_array[i][1]: # must change these if the N order moves!!!
+            N7 = sum_N(i,data_array,N7, line_count, 9)
+        if str(10) in data_array[i][1]:
+            N8 = sum_N(i,data_array,N8, line_count, 10)
         
 
     for i in range(len(tots)):
@@ -271,4 +292,3 @@ def sum_N(i, data_array, N, line_count, atom_num):
             break
     
     return N
-    
